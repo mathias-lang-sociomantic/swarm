@@ -194,7 +194,7 @@ public abstract class ConnectionHandlerTemplate ( Commands : ICommandCodes )
 
     ***************************************************************************/
 
-    public this ( FinalizeDg finalize_dg, ConnectionSetupParams setup )
+    public this ( scope FinalizeDg finalize_dg, ConnectionSetupParams setup )
     {
         super(finalize_dg, setup);
 
@@ -274,7 +274,7 @@ public abstract class ConnectionHandlerTemplate ( Commands : ICommandCodes )
     {
         debug
         {
-            const float Mb = 1024 * 1024;
+            static immutable float Mb = 1024 * 1024;
             size_t used1, free1;
             GC.usage(used1, free1);
 
@@ -297,7 +297,7 @@ public abstract class ConnectionHandlerTemplate ( Commands : ICommandCodes )
             // Log a warning if the length of any buffers acquired from the pool
             // of shared resources while handling this command exceed a sanity
             // limit afterwards.
-            const warn_limit = 1024 * 64; // anything > 64K will be logged
+            static immutable warn_limit = 1024 * 64; // anything > 64K will be logged
 
             foreach ( i, F; typeof(Resources.tupleof) )
             {
@@ -603,7 +603,7 @@ abstract public class ISwarmConnectionHandler : IFiberConnectionHandlerBase,
 
     ***************************************************************************/
 
-    public this ( FinalizeDg finalize_dg, ConnectionSetupParams setup )
+    public this ( scope FinalizeDg finalize_dg, ConnectionSetupParams setup )
     {
         debug this.connection_id = connection_count++;
 

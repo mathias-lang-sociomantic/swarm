@@ -61,7 +61,7 @@ public struct AcquiredArraysOf ( T )
 
     public void initialise ( FreeList!(ubyte[]) buffer_pool )
     {
-        this.buffer_pool = buffer_pool;
+        (&this).buffer_pool = buffer_pool;
     }
 
     /***************************************************************************
@@ -107,13 +107,13 @@ public struct AcquiredArraysOf ( T )
     public T[]* acquire ( )
     in
     {
-        assert(this.buffer_pool !is null);
+        assert((&this).buffer_pool !is null);
     }
     body
     {
         void[] newBuffer ( size_t capacity )
         {
-            auto buffer = this.buffer_pool.get(cast(ubyte[])new void[capacity]);
+            auto buffer = (&this).buffer_pool.get(cast(ubyte[])new void[capacity]);
             buffer.length = 0;
             enableStomping(buffer);
 
@@ -121,15 +121,15 @@ public struct AcquiredArraysOf ( T )
         }
 
         // Acquire container buffer, if not already done.
-        if ( this.acquired is null )
+        if ( (&this).acquired is null )
         {
-            this.acquired = cast(T[][])newBuffer((T[]).sizeof * 4);
+            (&this).acquired = cast(T[][])newBuffer((T[]).sizeof * 4);
         }
 
         // Acquire and re-initialise new buffer to return to the user. Store
         // it in the container buffer.
-        this.acquired ~= cast(T[])newBuffer(4);
-        return &this.acquired[$-1];
+        (&this).acquired ~= cast(T[])newBuffer(4);
+        return &(&this).acquired[$-1];
     }
 
     /***************************************************************************
@@ -141,18 +141,18 @@ public struct AcquiredArraysOf ( T )
     public void relinquishAll ( )
     in
     {
-        assert(this.buffer_pool !is null);
+        assert((&this).buffer_pool !is null);
     }
     body
     {
-        if ( this.acquired !is null )
+        if ( (&this).acquired !is null )
         {
             // Relinquish acquired buffers.
-            foreach ( ref inst; this.acquired )
-                this.buffer_pool.recycle(cast(ubyte[])inst);
+            foreach ( ref inst; (&this).acquired )
+                (&this).buffer_pool.recycle(cast(ubyte[])inst);
 
             // Relinquish container buffer.
-            this.buffer_pool.recycle(cast(ubyte[])this.acquired);
+            (&this).buffer_pool.recycle(cast(ubyte[])(&this).acquired);
         }
     }
 }
@@ -277,8 +277,8 @@ public struct Acquired ( T )
 
     public void initialise ( FreeList!(ubyte[]) buffer_pool, FreeList!(T) t_pool )
     {
-        this.buffer_pool = buffer_pool;
-        this.t_pool = t_pool;
+        (&this).buffer_pool = buffer_pool;
+        (&this).t_pool = t_pool;
     }
 
     /***************************************************************************
@@ -296,13 +296,13 @@ public struct Acquired ( T )
     public Elem acquire ( lazy Elem new_t )
     in
     {
-        assert(this.buffer_pool !is null);
+        assert((&this).buffer_pool !is null);
     }
     body
     {
         void[] newBuffer ( size_t capacity )
         {
-            auto buffer = this.buffer_pool.get(cast(ubyte[])new void[capacity]);
+            auto buffer = (&this).buffer_pool.get(cast(ubyte[])new void[capacity]);
             buffer.length = 0;
             enableStomping(buffer);
 
@@ -310,15 +310,15 @@ public struct Acquired ( T )
         }
 
         // Acquire container buffer, if not already done.
-        if ( this.acquired is null )
+        if ( (&this).acquired is null )
         {
-            this.acquired = cast(Elem[])newBuffer(Elem.sizeof * 4);
+            (&this).acquired = cast(Elem[])newBuffer(Elem.sizeof * 4);
         }
 
         // Acquire new element.
-        this.acquired ~= this.t_pool.get(new_t);
+        (&this).acquired ~= (&this).t_pool.get(new_t);
 
-        return this.acquired[$-1];
+        return (&this).acquired[$-1];
     }
 
     /***************************************************************************
@@ -330,18 +330,18 @@ public struct Acquired ( T )
     public void relinquishAll ( )
     in
     {
-        assert(this.buffer_pool !is null);
+        assert((&this).buffer_pool !is null);
     }
     body
     {
-        if ( this.acquired !is null )
+        if ( (&this).acquired !is null )
         {
             // Relinquish acquired Ts.
-            foreach ( ref inst; this.acquired )
-                this.t_pool.recycle(inst);
+            foreach ( ref inst; (&this).acquired )
+                (&this).t_pool.recycle(inst);
 
             // Relinquish container buffer.
-            this.buffer_pool.recycle(cast(ubyte[])this.acquired);
+            (&this).buffer_pool.recycle(cast(ubyte[])(&this).acquired);
         }
     }
 }
@@ -464,7 +464,7 @@ public struct AcquiredSingleton ( T )
 
     public void initialise ( FreeList!(T) t_pool )
     {
-        this.t_pool = t_pool;
+        (&this).t_pool = t_pool;
     }
 
     /***************************************************************************
@@ -482,16 +482,16 @@ public struct AcquiredSingleton ( T )
     public Elem acquire ( lazy Elem new_t )
     in
     {
-        assert(this.t_pool !is null);
+        assert((&this).t_pool !is null);
     }
     body
     {
-        if ( this.acquired is null )
-            this.acquired = this.t_pool.get(new_t);
+        if ( (&this).acquired is null )
+            (&this).acquired = (&this).t_pool.get(new_t);
 
-        assert(this.acquired !is null);
+        assert((&this).acquired !is null);
 
-        return this.acquired;
+        return (&this).acquired;
     }
 
     /***************************************************************************
@@ -509,22 +509,22 @@ public struct AcquiredSingleton ( T )
 
     ***************************************************************************/
 
-    public Elem acquire ( lazy Elem new_t, void delegate ( Elem ) reset )
+    public Elem acquire ( lazy Elem new_t, scope void delegate ( Elem ) reset )
     in
     {
-        assert(this.t_pool !is null);
+        assert((&this).t_pool !is null);
     }
     body
     {
-        if ( this.acquired is null )
+        if ( (&this).acquired is null )
         {
-            this.acquired = this.t_pool.get(new_t);
-            reset(this.acquired);
+            (&this).acquired = (&this).t_pool.get(new_t);
+            reset((&this).acquired);
         }
 
-        assert(this.acquired !is null);
+        assert((&this).acquired !is null);
 
-        return this.acquired;
+        return (&this).acquired;
     }
 
     /***************************************************************************
@@ -536,12 +536,12 @@ public struct AcquiredSingleton ( T )
     public void relinquish ( )
     in
     {
-        assert(this.t_pool !is null);
+        assert((&this).t_pool !is null);
     }
     body
     {
-        if ( this.acquired !is null )
-            this.t_pool.recycle(this.acquired);
+        if ( (&this).acquired !is null )
+            (&this).t_pool.recycle((&this).acquired);
     }
 }
 

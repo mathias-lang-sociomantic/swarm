@@ -114,9 +114,9 @@ public struct RequestOnConnSet
 
     public RequestOnConn setSingle ( RequestOnConn request_on_conn )
     {
-        this.is_all_nodes = false;
-        this.single_node = request_on_conn;
-        this.num_active = 1;
+        (&this).is_all_nodes = false;
+        (&this).single_node = request_on_conn;
+        (&this).num_active = 1;
 
         return request_on_conn;
     }
@@ -137,14 +137,14 @@ public struct RequestOnConnSet
     public RequestOnConn addMulti ( AddrPort remote_address,
         RequestOnConn request_on_conn )
     {
-        this.is_all_nodes = true;
+        (&this).is_all_nodes = true;
 
         bool added;
-        this.all_nodes.put(remote_address.cmp_id, added, request_on_conn);
-        assert(added, typeof(this).stringof ~ ".addMulti: a " ~
+        (&this).all_nodes.put(remote_address.cmp_id, added, request_on_conn);
+        assert(added, typeof((&this)).stringof ~ ".addMulti: a " ~
             "request-on-connection already exists for the node");
 
-        this.num_active++;
+        (&this).num_active++;
 
         return request_on_conn;
     }
@@ -164,17 +164,17 @@ public struct RequestOnConnSet
     public void finished ( RequestOnConn request_on_conn )
     in
     {
-        if ( !this.is_all_nodes )
-            assert(this.single_node == request_on_conn);
+        if ( !(&this).is_all_nodes )
+            assert((&this).single_node == request_on_conn);
     }
     out
     {
-        if ( !this.is_all_nodes )
-            assert(this.num_active == 0);
+        if ( !(&this).is_all_nodes )
+            assert((&this).num_active == 0);
     }
     body
     {
-        this.num_active--;
+        (&this).num_active--;
     }
 
     /***************************************************************************
@@ -188,27 +188,27 @@ public struct RequestOnConnSet
 
     ***************************************************************************/
 
-    public void reset ( void delegate ( RequestOnConn ) recycle )
+    public void reset ( scope void delegate ( RequestOnConn ) recycle )
     in
     {
-        assert(this.num_active == 0);
+        assert((&this).num_active == 0);
     }
     body
     {
-        if ( this.is_all_nodes )
+        if ( (&this).is_all_nodes )
         {
-            foreach ( request_on_conn; this.all_nodes )
+            foreach ( request_on_conn; (&this).all_nodes )
             {
-                this.all_nodes.remove(request_on_conn);
+                (&this).all_nodes.remove(request_on_conn);
                 recycle(request_on_conn);
             }
         }
         else
         {
-            recycle(this.single_node);
+            recycle((&this).single_node);
         }
 
-        this.is_all_nodes = false;
-        this.single_node = this.single_node.init;
+        (&this).is_all_nodes = false;
+        (&this).single_node = (&this).single_node.init;
     }
 }

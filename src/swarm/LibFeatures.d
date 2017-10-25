@@ -14,11 +14,11 @@
 
 module swarm.LibFeatures;
 
-const has_features_4_3 = true;
-const has_features_4_2 = true;
-const has_features_4_1 = true;
-const has_features_4_0 = true;
-const has_features_3_3 = true;
-const has_features_3_2 = true;
-const has_features_3_1 = true;
-const has_features_3_0 = true;
+static immutable has_features_4_3 = true;
+static immutable has_features_4_2 = true;
+static immutable has_features_4_1 = true;
+static immutable has_features_4_0 = true;
+static immutable has_features_3_3 = true;
+static immutable has_features_3_2 = true;
+static immutable has_features_3_1 = true;
+static immutable has_features_3_0 = true;

@@ -57,12 +57,12 @@ public static struct SerializableReferenceType ( Type )
 
     void set ( Type val )
     {
-        this.serialized[] = (cast(ubyte*)&val)[0..val.sizeof];
+        (&this).serialized[] = (cast(ubyte*)&val)[0..val.sizeof];
     }
 
     Type get ( )
     {
-        return *(cast(Type*)this.serialized.ptr);
+        return *(cast(Type*)(&this).serialized.ptr);
     }
 }
 
@@ -156,7 +156,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
     ***************************************************************************/
 
-    const RequestType request_type = request_type_;
+    static immutable RequestType request_type = request_type_;
 
     /***************************************************************************
 
@@ -205,9 +205,9 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
             deprecated("Construct a const UserSpecifiedParams instance at once; "
                 "do not set the notifier after construction.")
-            public void set ( Notifier notifier )
+            public void set ( scope Notifier notifier )
             {
-                this.serialized_notifier[] =
+                (&this).serialized_notifier[] =
                     (cast(Const!(ubyte)*)&notifier)[0..notifier.sizeof];
             }
         }
@@ -224,7 +224,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
 
         public Notifier getNotifier ( )
         {
-            return *(cast(Notifier*)(this.notifier.serialized_notifier.ptr));
+            return *(cast(Notifier*)((&this).notifier.serialized_notifier.ptr));
         }
     }
 
@@ -294,7 +294,7 @@ public template RequestCore ( RequestType request_type_, ubyte request_code,
             enableStomping(serialized);
             auto deserialized = Deserializer.deserialize!(UserSpecifiedParams)(
                 serialized);
-            this.user_params = *deserialized.ptr;
+            (&this).user_params = *deserialized.ptr;
         }
     }
 
@@ -419,8 +419,8 @@ unittest
 
         ***********************************************************************/
 
-        const ubyte RequestCode = 0;
-        const ubyte RequestVersion = 0;
+        enum ubyte RequestCode = 0;
+        enum ubyte RequestVersion = 0;
 
         struct Args
         {

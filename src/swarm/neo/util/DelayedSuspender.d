@@ -55,10 +55,10 @@ struct DelayedSuspender
 
     public void requestSuspension ( )
     {
-        with ( SuspendState ) switch ( this.state )
+        with ( SuspendState ) switch ( (&this).state )
         {
             case None:
-                this.state = Pending;
+                (&this).state = Pending;
                 break;
             case Pending:
                 // Suspend already requested; do nothing.
@@ -80,18 +80,18 @@ struct DelayedSuspender
 
     public void resumeIfSuspended ( )
     {
-        with ( SuspendState ) switch ( this.state )
+        with ( SuspendState ) switch ( (&this).state )
         {
             case None:
                 // Already running; do nothing.
                 break;
             case Pending:
                 // Already running; cancel suspend request.
-                this.state = None;
+                (&this).state = None;
                 break;
             case Suspended:
-                this.state = None;
-                this.fiber.resume(this.token);
+                (&this).state = None;
+                (&this).fiber.resume((&this).token);
                 break;
             default: assert(false);
         }
@@ -105,15 +105,15 @@ struct DelayedSuspender
 
     public void suspendIfRequested ( )
     {
-        with ( SuspendState ) switch ( this.state )
+        with ( SuspendState ) switch ( (&this).state )
         {
             case None:
             case Suspended:
                 // No state change requested; do nothing.
                 break;
             case Pending:
-                this.state = Suspended;
-                this.fiber.suspend(this.token);
+                (&this).state = Suspended;
+                (&this).fiber.suspend((&this).token);
                 break;
             default: assert(false);
         }

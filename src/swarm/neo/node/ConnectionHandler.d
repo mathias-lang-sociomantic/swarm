@@ -232,7 +232,7 @@ class ConnectionHandler : IConnectionHandler
 
     ***************************************************************************/
 
-    public this ( FinalizeDg return_to_pool, SharedParams shared_params )
+    public this ( scope FinalizeDg return_to_pool, SharedParams shared_params )
     {
         auto socket = new AddressIPSocket!();
         super(socket, null, null);
