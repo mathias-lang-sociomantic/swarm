@@ -96,17 +96,20 @@ class ProtocolError: Exception
     private void setFmt_ ( T... ) ( istring file, long line, cstring fmt, T args )
     {
         this.reused_msg.reset();
-        sformat(
-            cast(FormatterSink) (cstring chunk) {
-                this.reused_msg ~= chunk;
-                return chunk.length;
-            },
-            fmt,
-            args
-        );
+        static if (is(FormatterSink))
+            sformat((cstring chunk) { this.reused_msg ~= chunk; }, fmt, args);
+        else
+            sformat(
+                (cstring chunk)
+                {
+                    this.reused_msg ~= chunk;
+                    return chunk.length;
+                },
+                fmt,
+                args
+            );
 
         this.file = file;
         this.line = line;
     }
 }
-
