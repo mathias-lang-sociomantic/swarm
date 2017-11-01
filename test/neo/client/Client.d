@@ -78,7 +78,7 @@ public class Client
 
         ***********************************************************************/
 
-        public void put ( hash_t key, in void[] value, Put.Notifier notifier )
+        public void put ( hash_t key, in void[] value, scope Put.Notifier notifier )
         {
             auto params = Const!(Internals.Put.UserSpecifiedParams)(
                 Const!(Put.Args)(key, value),
@@ -102,7 +102,7 @@ public class Client
 
         ***********************************************************************/
 
-        public void get ( hash_t key, Get.Notifier notifier )
+        public void get ( hash_t key, scope Get.Notifier notifier )
         {
             auto params = Const!(Internals.Get.UserSpecifiedParams)(
                 Const!(Get.Args)(key),
@@ -131,7 +131,7 @@ public class Client
 
         ***********************************************************************/
 
-        public RequestId getAll ( GetAll.Notifier notifier )
+        public RequestId getAll ( scope GetAll.Notifier notifier )
         {
             auto params = Const!(Internals.GetAll.UserSpecifiedParams)(
                 Const!(GetAll.Args)(),
@@ -201,7 +201,7 @@ public class Client
         ***********************************************************************/
 
         public bool control ( ControllerInterface ) ( RequestId id,
-            void delegate ( ControllerInterface ) dg )
+            scope void delegate ( ControllerInterface ) dg )
         {
             alias Request!(ControllerInterface) R;
 
@@ -251,7 +251,7 @@ public class Client
 
         ***********************************************************************/
 
-        public bool put ( hash_t key, in void[] value, Neo.Put.Notifier notifier )
+        public bool put ( hash_t key, in void[] value, scope Neo.Put.Notifier notifier )
         {
             auto task = Task.getThis();
             assert(task !is null);
@@ -294,7 +294,7 @@ public class Client
 
         ***********************************************************************/
 
-        public bool get ( hash_t key, ref void[] value, Neo.Get.Notifier notifier )
+        public bool get ( hash_t key, ref void[] value, scope Neo.Get.Notifier notifier )
         {
             auto task = Task.getThis();
             assert(task !is null);
@@ -358,7 +358,7 @@ public class Client
             *******************************************************************/
 
             public int opApply (
-                int delegate ( ref hash_t key, ref Const!(void)[] value ) dg )
+                scope int delegate ( ref hash_t key, ref Const!(void)[] value ) dg )
             {
                 int res;
 
@@ -368,7 +368,7 @@ public class Client
                 bool rq_finished;
                 void internalNotifier ( Neo.GetAll.Notification info, Neo.GetAll.Args args )
                 {
-                    this.notifier(info, args);
+                    (&this).notifier(info, args);
 
                     with ( info.Active ) switch ( info.active )
                     {
@@ -393,7 +393,7 @@ public class Client
                         task.resume();
                 }
 
-                this.neo.getAll(&internalNotifier);
+                (&this).neo.getAll(&internalNotifier);
                 if ( !rq_finished )
                     task.suspend();
 
@@ -415,7 +415,7 @@ public class Client
 
         ***********************************************************************/
 
-        public GetAllFruct getAll ( Neo.GetAll.Notifier notifier )
+        public GetAllFruct getAll ( scope Neo.GetAll.Notifier notifier )
         {
             return GetAllFruct(this.outer.neo, notifier);
         }
@@ -447,7 +447,7 @@ public class Client
     ***************************************************************************/
 
     public this ( EpollSelectDispatcher epoll, cstring addr, ushort port,
-        Neo.ConnectionNotifier conn_notifier )
+        scope Neo.ConnectionNotifier conn_notifier )
     {
         this.epoll = epoll;
         this.conn_notifier = conn_notifier;
@@ -473,7 +473,7 @@ public class Client
     ***************************************************************************/
 
     public this ( EpollSelectDispatcher epoll, Neo.Config config,
-        Neo.ConnectionNotifier conn_notifier )
+        scope Neo.ConnectionNotifier conn_notifier )
     {
         this.epoll = epoll;
         this.conn_notifier = conn_notifier;
